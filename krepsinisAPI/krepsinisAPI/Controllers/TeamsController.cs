@@ -8,6 +8,10 @@ using Microsoft.EntityFrameworkCore;
 using krepsinisAPI.Context;
 using krepsinisAPI.Models;
 using krepsinisAPI.DTOs;
+using Microsoft.AspNetCore.Authorization;
+using krepsinisAPI.Auth.Model;
+using System.Security.Claims;
+using Microsoft.IdentityModel.JsonWebTokens;
 
 namespace krepsinisAPI.Controllers
 {
@@ -16,10 +20,12 @@ namespace krepsinisAPI.Controllers
     public class TeamsController : ControllerBase
     {
         private readonly BasketballDbContext _context;
+        private readonly IAuthorizationService authorizationService;
 
-        public TeamsController(BasketballDbContext context)
+        public TeamsController(BasketballDbContext context, IAuthorizationService authorizationService)
         {
             _context = context;
+            this.authorizationService = authorizationService;
         }
 
         // GET: api/Teams
@@ -51,32 +57,49 @@ namespace krepsinisAPI.Controllers
         // PUT: api/Teams/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{teamId}")]
-        public async Task<IActionResult> PutTeam(int teamId, Team team)
+        [Authorize(Roles = Roles.Admin)]
+        public async Task<IActionResult> PutTeam(int teamId, UpdateTeamDTO teamDTO)
         {
-            if (teamId != team.TeamId)
+            var contextTeam = await _context.Teams.FindAsync(teamId);
+
+            if (contextTeam == null) return NotFound();
+
+            var authorizationResult = await authorizationService.AuthorizeAsync(User, contextTeam, PolicyNames.ResourceOwner);
+            if (!authorizationResult.Succeeded)
             {
-                return BadRequest();
+                return Forbid();
             }
 
-            _context.Entry(team).State = EntityState.Modified;
+            contextTeam.Arena = teamDTO.arena;
+            contextTeam.Name = teamDTO.name;
+            await _context.SaveChangesAsync();
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!TeamExists(teamId))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            return Ok(new TeamDTO(teamId, contextTeam.Name, contextTeam.Arena, contextTeam.DateFounded));
 
-            return NoContent();
+            //if (teamId != team.TeamId)
+            //{
+            //    return BadRequest();
+            //}
+
+            //_context.Entry(team).State = EntityState.Modified;
+
+            //try
+            //{
+            //    await _context.SaveChangesAsync();
+            //}
+            //catch (DbUpdateConcurrencyException)
+            //{
+            //    if (!TeamExists(teamId))
+            //    {
+            //        return NotFound();
+            //    }
+            //    else
+            //    {
+            //        throw;
+            //    }
+            //}
+
+            //return NoContent();
         }
 
         // POST: api/Teams
@@ -84,7 +107,7 @@ namespace krepsinisAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<TeamDTO>> PostTeam(CreateTeamDTO team)
         {
-            var newTeam = new Team () { Arena = team.arena, DateFounded = DateTime.UtcNow, Name = team.name};
+            var newTeam = new Team () { Arena = team.arena, DateFounded = DateTime.UtcNow, Name = team.name, UserId = User.FindFirstValue(JwtRegisteredClaimNames.Sub)};
             _context.Teams.Add(newTeam);
             await _context.SaveChangesAsync();
 
@@ -93,6 +116,7 @@ namespace krepsinisAPI.Controllers
 
         // DELETE: api/Teams/5
         [HttpDelete("{teamId}", Name = "DeleteTeam")]
+        [Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> DeleteTeam(int teamId)
         {
             var team = await _context.Teams.FindAsync(teamId);

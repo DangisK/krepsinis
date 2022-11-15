@@ -25,11 +25,15 @@ export const PlayersTable = () => {
 
   const fetchTeams = async () => {
     setIsTeamsLoading(true);
-    const response = await fetch("https://localhost:7116/api/teams");
-    const data = await response.json();
-    setTeams(data);
-    setTeamId(data[0].id);
-    setIsTeamsLoading(false);
+    try {
+      const response = await fetch("https://localhost:7116/api/teams");
+      const data = await response.json();
+      setTeams(data);
+      setTeamId(data[0].id);
+      setIsTeamsLoading(false);
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   const getPlayers = async () => {

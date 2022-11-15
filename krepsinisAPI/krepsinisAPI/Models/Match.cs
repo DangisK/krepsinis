@@ -1,8 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using krepsinisAPI.Auth.Model;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace krepsinisAPI.Models
 {
-    public class Match
+    public class Match : IUserOwnedResource
     {
         public int MatchId { get; set; }
         public int HomeTeamScore { get; set; }
@@ -18,5 +20,8 @@ namespace krepsinisAPI.Models
         public int? TournamentId { get; set; }
         [ForeignKey("TournamentId")]
         public Tournament? Tournament { get; set; }
+        public string? UserId { get; set; }
+        [ForeignKey("UserId")]
+        public User? User { get; set; }
     }
 }

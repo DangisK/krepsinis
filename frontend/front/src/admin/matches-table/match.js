@@ -1,5 +1,6 @@
 import {
   Box,
+  CircularProgress,
   styled,
   Table,
   TableBody,
@@ -14,12 +15,19 @@ import React, { useEffect, useState } from "react";
 import "./styles.css";
 
 export const MatchesTable = () => {
+  const [isLoading, setIsLoading] = useState(true);
   const [matches, setMatches] = useState([]);
 
   const getMatches = async () => {
-    const response = await fetch("https://localhost:7116/api/matches");
-    const data = await response.json();
-    setMatches(data);
+    setIsLoading(true);
+    try {
+      const response = await fetch("https://localhost:7116/api/matches");
+      const data = await response.json();
+      setMatches(data);
+      setIsLoading(false);
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   useEffect(() => {
@@ -35,6 +43,10 @@ export const MatchesTable = () => {
       fontSize: 16,
     },
   }));
+
+  if (isLoading) {
+    return <CircularProgress />;
+  }
 
   return (
     <Box

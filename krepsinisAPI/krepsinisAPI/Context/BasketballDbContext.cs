@@ -1,9 +1,11 @@
-﻿using krepsinisAPI.Models;
+﻿using krepsinisAPI.Auth.Model;
+using krepsinisAPI.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace krepsinisAPI.Context
 {
-    public class BasketballDbContext : DbContext
+    public class BasketballDbContext : IdentityDbContext<User>
     {
         public DbSet<Injury> Injuries { get; set; }
         public DbSet<Match> Matches { get; set; }
