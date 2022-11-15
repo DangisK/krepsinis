@@ -1,0 +1,38 @@
+nav {
+    background: var(--clr-white);
+    box-shadow: var(--light-shadow);
+    height: 10vh;
+}
+
+.nav__header a {
+    display: inline-block;
+    padding: 1rem;
+}
+
+.nav__center {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    height: 100%;
+}
+
+.nav__header h1 {
+    color: black;
+    margin: 0;
+    font-size: 32px;
+}
+
+ul {
+    list-style-type: none;
+}
+
+a {
+    text-decoration: none;
+    cursor: pointer;
+    color: inherit;
+}
+
+.nav__links {
+    transition: var(--transition);
+    margin-left: 20px;
+}

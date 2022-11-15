@@ -1,0 +1,19 @@
+.content__header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 24px;
+}
+
+main {
+  color: var(--clr-white);
+}
+
+main h1 {
+  font-size: 48px;
+}
+
+main p {
+  font-size: 17px;
+}

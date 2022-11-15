@@ -1,0 +1,30 @@
+.links {
+    display: flex;
+}
+
+    .links a {
+        color: var(--clr-grey-3);
+        font-size: 1rem;
+        text-transform: capitalize;
+        letter-spacing: var(--spacing);
+        display: block;
+        padding: 0.5rem 1rem;
+        transition: var(--transition);
+    }
+
+        .links a:hover {
+            background: var(--clr-grey-10);
+            color: var(--clr-primary-5);
+            padding-left: 1.5rem;
+        }
+
+.footer {
+    color: var(--clr-white);
+    display: flex;
+    justify-content: center;
+    height: 5vh;
+}
+
+.footer__links a {
+    color: var(--clr-white);
+}
