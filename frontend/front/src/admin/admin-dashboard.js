@@ -19,7 +19,6 @@ export const AdminDashboard = () => {
           <Button onClick={() => navigateToAdminPage("traumos")}>Traumos</Button>
           <Button onClick={() => navigateToAdminPage("rungtynes")}>Rungtynės</Button>
           <Button onClick={() => navigateToAdminPage("turnyrai")}>Turnyrai</Button>
-          <Button onClick={() => navigateToAdminPage("turnyru-komandos")}>Turnyrų Komandos</Button>
         </ButtonGroup>
       </div>
       <Outlet />

@@ -1,8 +1,10 @@
 ﻿import "./navbar.css";
-import React from "react";
+import React, { useContext } from "react";
 import { Link } from "react-router-dom";
+import { AppContext } from "../AppContext";
 
 export const Navbar = () => {
+  const { user } = useContext(AppContext);
   return (
     <nav>
       <div className="nav__center">
@@ -25,9 +27,11 @@ export const Navbar = () => {
             <li>
               <Link to="/zaidejas">Žaidėjas</Link>
             </li>
-            <li>
-              <Link to="/db-lenteles">Secret!</Link>
-            </li>
+            {user.roles.find((role) => role === "Admin") && (
+              <li>
+                <Link to="/db-lenteles">Secret!</Link>
+              </li>
+            )}
           </ul>
         </div>
       </div>

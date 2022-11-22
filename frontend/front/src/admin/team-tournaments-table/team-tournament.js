@@ -1,5 +1,6 @@
 import {
   Box,
+  CircularProgress,
   styled,
   Table,
   TableBody,
@@ -15,11 +16,18 @@ import "./styles.css";
 
 export const TeamTournamentsTable = () => {
   const [teamTournaments, setTeamTournaments] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const getTeamTournaments = async () => {
-    const response = await fetch("https://localhost:7116/api/team-tournaments");
-    const data = await response.json();
-    setTeamTournaments(data);
+    setIsLoading(true);
+    try {
+      const response = await fetch("https://localhost:7116/api/team-tournaments");
+      const data = await response.json();
+      setTeamTournaments(data);
+      setIsLoading(false);
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   useEffect(() => {
@@ -41,6 +49,10 @@ export const TeamTournamentsTable = () => {
       .toString(16)
       .substring(1);
   };
+
+  if (isLoading) {
+    return <CircularProgress />;
+  }
 
   return (
     <Box

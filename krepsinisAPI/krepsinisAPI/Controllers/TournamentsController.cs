@@ -24,6 +24,7 @@ namespace krepsinisAPI.Controllers
 
         // GET: api/Tournaments
         [HttpGet]
+        [ResponseCache(Duration = 60)]
         public async Task<ActionResult<IEnumerable<Tournament>>> GetTournaments()
         {
             return await _context.Tournaments.ToListAsync();

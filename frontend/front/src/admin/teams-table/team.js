@@ -9,17 +9,26 @@ import {
   tableCellClasses,
   Typography,
   Box,
+  CircularProgress,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import "./styles.css";
 
 export const TeamsTable = () => {
   const [teams, setTeams] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const getTeams = async () => {
-    const response = await fetch("https://localhost:7116/api/teams");
-    const data = await response.json();
-    setTeams(data);
+    setIsLoading(true);
+    try {
+      const response = await fetch("https://localhost:7116/api/teams");
+      const data = await response.json();
+      setTeams(data);
+      setIsLoading(false);
+    } catch (e) {
+      console.log(e);
+    }
+    setIsLoading(false);
   };
 
   useEffect(() => {
@@ -35,6 +44,10 @@ export const TeamsTable = () => {
       fontSize: 16,
     },
   }));
+
+  if (isLoading) {
+    return <CircularProgress />;
+  }
 
   return (
     <Box

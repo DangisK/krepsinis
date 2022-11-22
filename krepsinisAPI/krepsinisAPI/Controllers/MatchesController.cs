@@ -24,6 +24,7 @@ namespace krepsinisAPI.Controllers
 
         // GET: api/Matches
         [HttpGet]
+        [ResponseCache(Duration = 60)]
         public async Task<ActionResult<IEnumerable<Match>>> GetMatches()
         {
             return await _context.Matches.ToListAsync();
