@@ -30,6 +30,7 @@ namespace krepsinisAPI.Controllers
 
         // GET: api/Teams
         [HttpGet]
+        [ResponseCache(Duration = 60)]
         public async Task<ActionResult<IEnumerable<TeamDTO>>> GetTeams()
         {
             var teams = await _context.Teams.ToListAsync();

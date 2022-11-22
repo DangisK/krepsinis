@@ -24,6 +24,7 @@ namespace krepsinisAPI.Controllers
 
         // GET: api/Players
         [HttpGet]
+        [ResponseCache(Duration = 60)]
         public async Task<ActionResult<IEnumerable<Player>>> GetPlayers(int teamId)
         {
             var team = await _context.Teams.FindAsync(teamId);
