@@ -16,22 +16,22 @@ export const Navbar = () => {
         <div className="nav__links">
           <ul className="links">
             <li>
-              <Link to="/turnyrine-lentele">Turnyrinė lentelė</Link>
+              <Link to="/komandos">Komandos</Link>
             </li>
             <li>
-              <Link to="/tvarkarastis">Tvarkaraštis</Link>
-            </li>
-            <li>
-              <Link to="/komandos-sudetis">Komandos sudėtis</Link>
-            </li>
-            <li>
-              <Link to="/zaidejas">Žaidėjas</Link>
+              <Link to="/turnyrai">Turnyrai</Link>
             </li>
             {user.roles.find((role) => role === "Admin") && (
               <li>
                 <Link to="/db-lenteles">Secret!</Link>
               </li>
             )}
+            <li>
+              <Link to="/turnyrine-lentele">Turnyrinė lentelė</Link>
+            </li>
+            <li>
+              <Link to="/tvarkarastis">Tvarkaraštis</Link>
+            </li>
           </ul>
         </div>
       </div>

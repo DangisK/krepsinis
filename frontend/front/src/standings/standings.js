@@ -4,7 +4,7 @@ import "./styles.css";
 
 export const Standings = () => {
   return (
-    <>
+    <div className="standings">
       <div className="content__header">
         <Typography variant="h2">Turnyrinė lentelė</Typography>
       </div>
@@ -78,6 +78,6 @@ export const Standings = () => {
           </tbody>
         </table>
       </div>
-    </>
+    </div>
   );
 };

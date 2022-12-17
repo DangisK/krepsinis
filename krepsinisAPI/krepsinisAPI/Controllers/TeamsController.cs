@@ -30,7 +30,6 @@ namespace krepsinisAPI.Controllers
 
         // GET: api/Teams
         [HttpGet]
-        [ResponseCache(Duration = 60)]
         public async Task<ActionResult<IEnumerable<TeamDTO>>> GetTeams()
         {
             var teams = await _context.Teams.ToListAsync();
@@ -58,18 +57,18 @@ namespace krepsinisAPI.Controllers
         // PUT: api/Teams/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{teamId}")]
-        [Authorize(Roles = Roles.Admin)]
+        //[Authorize(Roles = Roles.Admin)]
         public async Task<IActionResult> PutTeam(int teamId, UpdateTeamDTO teamDTO)
         {
             var contextTeam = await _context.Teams.FindAsync(teamId);
 
             if (contextTeam == null) return NotFound();
 
-            var authorizationResult = await authorizationService.AuthorizeAsync(User, contextTeam, PolicyNames.ResourceOwner);
-            if (!authorizationResult.Succeeded)
-            {
-                return Forbid();
-            }
+            //var authorizationResult = await authorizationService.AuthorizeAsync(User, contextTeam, PolicyNames.ResourceOwner);
+            //if (!authorizationResult.Succeeded)
+            //{
+            //    return Forbid();
+            //}
 
             contextTeam.Arena = teamDTO.arena;
             contextTeam.Name = teamDTO.name;

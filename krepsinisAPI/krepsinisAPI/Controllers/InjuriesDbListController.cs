@@ -24,7 +24,6 @@ namespace krepsinisAPI.Controllers
 
         // GET: api/Injuries
         [HttpGet]
-        [ResponseCache(Duration = 60)]
         public async Task<ActionResult<IEnumerable<Injury>>> GetInjuries()
         {
 

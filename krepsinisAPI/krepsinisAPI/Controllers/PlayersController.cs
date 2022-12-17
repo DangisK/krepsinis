@@ -24,7 +24,6 @@ namespace krepsinisAPI.Controllers
 
         // GET: api/Players
         [HttpGet]
-        [ResponseCache(Duration = 60)]
         public async Task<ActionResult<IEnumerable<Player>>> GetPlayers(int teamId)
         {
             var team = await _context.Teams.FindAsync(teamId);
@@ -45,7 +44,11 @@ namespace krepsinisAPI.Controllers
             var player = await _context.Players.FindAsync(playerId);
             if (player == null) return NotFound();
 
-            return new PlayerDTO(player.PlayerId, player.Name, player.Surname, teamId);
+            if (player.Team == null) return NotFound();
+
+            if (player.Team.TeamId != teamId) return NotFound();
+
+            return new PlayerDTO(player.PlayerId, player.Name, player.Surname, player.Points, player.Assists, player.Rebounds, player.TotalGames, player.Team.Name, teamId);
         }
 
         // PUT: api/Players/5
@@ -91,7 +94,7 @@ namespace krepsinisAPI.Controllers
             _context.Players.Add(newPlayer);
             await _context.SaveChangesAsync();
 
-            return Created($"/api/teams/{team.TeamId}/players/{newPlayer.PlayerId}", player);
+            return Created($"/api/teams/{team.TeamId}/players/{newPlayer.PlayerId}", newPlayer);
         }
 
         // DELETE: api/Players/5

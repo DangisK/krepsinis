@@ -7,7 +7,7 @@ import { Routes, Route, useNavigate } from "react-router-dom";
 import { Standings } from "./standings";
 import { Schedule } from "./schedule";
 import { Roster } from "./roster";
-import { Player } from "./player";
+import { SelectedPlayer } from "./selected-player";
 import {
   AdminDashboard,
   InjuriesTable,
@@ -18,19 +18,23 @@ import {
 } from "./admin";
 import { Auth } from "./auth";
 import { AppContext } from "./AppContext";
+import { Team } from "./team";
+import { PageNotFound } from "./page-not-found";
+import { Tournament } from "./tournament";
+import { Match } from "./match";
 
 function App() {
-  const [user, setUser] = useState({ token: "", roles: "" });
+  const [user, setUser] = useState({ token: "kazkas", roles: ["Admin"] });
   const isUserLoggedIn = user.token !== "";
   const navigateTo = useNavigate();
 
-  useEffect(() => {
-    if (isUserLoggedIn) {
-      navigateTo("/");
-    } else {
-      navigateTo("/auth");
-    }
-  }, [isUserLoggedIn]);
+  // useEffect(() => {
+  //   if (isUserLoggedIn) {
+  //     navigateTo("/komandos");
+  //   } else {
+  //     navigateTo("/auth");
+  //   }
+  // }, [isUserLoggedIn]);
 
   return (
     <>
@@ -38,6 +42,7 @@ function App() {
         {!isUserLoggedIn ? (
           <Routes>
             <Route path="/auth" element={<Auth />} />
+            <Route path="*" element={<PageNotFound />} />
           </Routes>
         ) : (
           <>
@@ -45,11 +50,17 @@ function App() {
             <main>
               <div className="container">
                 <Routes>
-                  <Route index element={<Home />} />
+                  <Route index exact path="/" element={<Home />} />
                   <Route path="/turnyrine-lentele" element={<Standings />} />
                   <Route path="/tvarkarastis" element={<Schedule />} />
-                  <Route path="/komandos-sudetis" element={<Roster />} />
-                  <Route path="/zaidejas" element={<Player />} />
+                  <Route path="/turnyrai" element={<Tournament />} />
+                  <Route path="/turnyrai/:turnyroId" element={<Match />} />
+                  <Route path="/komandos/:komandosId" element={<Roster />} />
+                  <Route
+                    path="/komandos/:komandosId/zaidejas/:zaidejoId"
+                    element={<SelectedPlayer />}
+                  />
+                  <Route path="/komandos" element={<Team />} />
                   {user.roles.find((role) => role === "Admin") && (
                     <Route path="/db-lenteles" element={<AdminDashboard />}>
                       <Route index element={<TeamsTable />} />
@@ -60,6 +71,7 @@ function App() {
                       <Route path="turnyrai" element={<TournamentsTable />} />
                     </Route>
                   )}
+                  <Route path="*" element={<PageNotFound />} />
                 </Routes>
               </div>
             </main>

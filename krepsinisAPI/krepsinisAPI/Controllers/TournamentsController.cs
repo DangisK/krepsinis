@@ -24,7 +24,6 @@ namespace krepsinisAPI.Controllers
 
         // GET: api/Tournaments
         [HttpGet]
-        [ResponseCache(Duration = 60)]
         public async Task<ActionResult<IEnumerable<Tournament>>> GetTournaments()
         {
             return await _context.Tournaments.ToListAsync();
@@ -47,32 +46,47 @@ namespace krepsinisAPI.Controllers
         // PUT: api/Tournaments/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{tournamentId}")]
-        public async Task<IActionResult> PutTournament(int tournamentId, Tournament tournament)
+        public async Task<IActionResult> PutTournament(int tournamentId, UpdateTournamentDTO updateTournamentDTO)
         {
-            if (tournamentId != tournament.TournamentId)
-            {
-                return BadRequest();
-            }
+            var tournament = await _context.Tournaments.FindAsync(tournamentId);
 
-            _context.Entry(tournament).State = EntityState.Modified;
+            if (tournament == null) return NotFound();
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!TournamentExists(tournamentId))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            //var authorizationResult = await authorizationService.AuthorizeAsync(User, contextTeam, PolicyNames.ResourceOwner);
+            //if (!authorizationResult.Succeeded)
+            //{
+            //    return Forbid();
+            //}
 
-            return NoContent();
+            tournament.Name = updateTournamentDTO.name;
+            tournament.EndDate = tournament.StartDate.AddMonths(updateTournamentDTO.monthsDuration);
+            await _context.SaveChangesAsync();
+
+            return Ok(new TournamentDTO(tournamentId, updateTournamentDTO.name, tournament.StartDate, tournament.EndDate));
+            //if (tournamentId != tournament.TournamentId)
+            //{
+            //    return BadRequest();
+            //}
+
+            //_context.Entry(tournament).State = EntityState.Modified;
+
+            //try
+            //{
+            //    await _context.SaveChangesAsync();
+            //}
+            //catch (DbUpdateConcurrencyException)
+            //{
+            //    if (!TournamentExists(tournamentId))
+            //    {
+            //        return NotFound();
+            //    }
+            //    else
+            //    {
+            //        throw;
+            //    }
+            //}
+
+            //return NoContent();
         }
 
         // POST: api/Tournaments
@@ -80,7 +94,7 @@ namespace krepsinisAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<TournamentDTO>> PostTournament(CreateTournamentDTO tournament)
         {
-            var newTournament = new Tournament() { EndDate = tournament.startDate.AddMonths(tournament.monthsDuration), StartDate = tournament.startDate, Name = tournament.name };
+            var newTournament = new Tournament() { EndDate = DateTime.Now.AddMonths(tournament.monthsDuration), StartDate = DateTime.Now, Name = tournament.name };
             _context.Tournaments.Add(newTournament);
             await _context.SaveChangesAsync();
 
