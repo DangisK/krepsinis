@@ -1,12 +1,15 @@
 import { Delete, Edit } from "@mui/icons-material";
 import { LinearProgress, Typography } from "@mui/material";
+import { UserContext } from "../context/user-context";
 import React, { useEffect, useState } from "react";
+import { useContext } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { MatchAddModal } from "./match-add-modal";
 import { MatchEditModal } from "./match-edit-modal";
 import "./styles.css";
 
 export const Match = () => {
+  const { user } = useContext(UserContext);
   const { turnyroId } = useParams();
   const [tournament, setTournament] = useState(null);
   const [matches, setMatches] = useState([]);
@@ -38,9 +41,8 @@ export const Match = () => {
         {
           method: "DELETE",
           headers: {
-            "Content-Type": "application/json",
+            Authorization: `Bearer ${user.token}`,
           },
-          body: JSON.stringify(""),
         }
       );
       const filteredMatches = matches.filter((match) => match.id !== selectedMatch.id);
@@ -64,7 +66,12 @@ export const Match = () => {
   const fetchMatches = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch(`https://localhost:7116/api/tournaments/${turnyroId}/matches`);
+      const response = await fetch(`https://localhost:7116/api/tournaments/${turnyroId}/matches`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
       const data = await response.json();
       if (data.status === 404) {
         navigateTo("/tournaments");
@@ -80,7 +87,12 @@ export const Match = () => {
   const fetchTeams = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch(`https://localhost:7116/api/teams`);
+      const response = await fetch(`https://localhost:7116/api/teams`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
       const data = await response.json();
       if (data.status === 404) {
         navigateTo("/tournaments");
@@ -96,7 +108,12 @@ export const Match = () => {
   const fetchTournament = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch(`https://localhost:7116/api/tournaments/${turnyroId}`);
+      const response = await fetch(`https://localhost:7116/api/tournaments/${turnyroId}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
       const data = await response.json();
       console.log(data);
       if (data.status === 404) {

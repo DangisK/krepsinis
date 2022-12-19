@@ -24,9 +24,12 @@ import { DateTimePicker } from "@mui/x-date-pickers";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
+import { useContext } from "react";
+import { UserContext } from "../../context/user-context";
 // import { GetUserData } from "../../pages/auth";
 
 export const MatchAddModal = ({ onCreate }) => {
+  const { user } = useContext(UserContext);
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [teams, setTeams] = useState([]);
@@ -46,6 +49,13 @@ export const MatchAddModal = ({ onCreate }) => {
     console.log(date);
   }, [date]);
 
+  const clearInputs = () => {
+    setHomeTeamScore(0);
+    setAwayTeamScore(0);
+    setHomeTeam("");
+    setAwayTeam("");
+  };
+
   const handleDateChange = (newValue) => {
     setDate(newValue);
   };
@@ -53,7 +63,12 @@ export const MatchAddModal = ({ onCreate }) => {
   const fetchTeams = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`https://localhost:7116/api/teams`);
+      const response = await fetch(`https://localhost:7116/api/teams`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
       const data = await response.json();
       setTeams(data);
     } catch (e) {
@@ -77,12 +92,14 @@ export const MatchAddModal = ({ onCreate }) => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}`,
         },
         body: JSON.stringify(createdMatch),
       });
       const data = await response.json();
       onCreate(data);
       setOpen(false);
+      clearInputs();
     } catch (e) {
       console.log(e);
     }
@@ -153,10 +170,10 @@ export const MatchAddModal = ({ onCreate }) => {
               label="Svečių Taškai"
               placeholder="Svečiai"
               value={awayTeamScore}
+              InputProps={{ inputProps: { min: 0, max: 100 } }}
               InputLabelProps={{
                 shrink: true,
               }}
-              InputProps={{ inputProps: { min: 0, max: 100 } }}
               onChange={(e) => {
                 const digitRegex = /^\d+$/;
                 if (e.target.value === "" || digitRegex.test(e.target.value)) {
@@ -202,7 +219,7 @@ export const MatchAddModal = ({ onCreate }) => {
           <FormControl sx={{ width: "100%", marginTop: "20px" }}>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DateTimePicker
-                label="Laikas"
+                label="Įkūrimo data"
                 value={date}
                 onChange={handleDateChange}
                 renderInput={(params) => <TextField {...params} />}

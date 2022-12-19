@@ -1,18 +1,43 @@
-import { Box, List, ListItem, ListItemText, Paper, styled, Typography } from "@mui/material";
+import {
+  Box,
+  IconButton,
+  List,
+  ListItem,
+  ListItemText,
+  Menu,
+  MenuItem,
+  Paper,
+  styled,
+  Typography,
+} from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { LinearProgress } from "@mui/material";
 import "./styles.css";
 import { useNavigate } from "react-router-dom";
+import { TeamEditModal } from "./team-edit-modal/team-edit-modal";
+import { TeamAddModal } from "./team-add-modal/team-add-modal";
+import { MoreVert } from "@mui/icons-material";
+import { useContext } from "react";
+import { UserContext } from "../context/user-context";
 
 export const Team = () => {
-  const navigateTo = useNavigate();
+  const { user } = useContext(UserContext);
   const [teams, setTeams] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedTeam, setSelectedTeam] = useState(null);
+  const [editingTeam, setEditingTeam] = useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
+  const navigateTo = useNavigate();
 
   const fetchTeams = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch("https://localhost:7116/api/teams");
+      const response = await fetch("https://localhost:7116/api/teams", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
       const data = await response.json();
       setTeams(data);
       setIsLoading(false);
@@ -24,6 +49,56 @@ export const Team = () => {
   useEffect(() => {
     fetchTeams();
   }, []);
+
+  const openMoreOptions = Boolean(anchorEl);
+  const handleClick = (team, e) => {
+    setSelectedTeam(team);
+    setAnchorEl(e.currentTarget);
+    e.stopPropagation();
+  };
+
+  const onUpdate = (updatedTeam) => {
+    const updatedTeams = teams.map((team) => (team.id === updatedTeam.id ? updatedTeam : team));
+    console.log(teams);
+    setTeams(updatedTeams);
+  };
+
+  const onCreate = (createdTeam) => {
+    const newTeams = [...teams, createdTeam];
+    console.log(newTeams);
+    setTeams(newTeams);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleEdit = () => {
+    setEditingTeam(selectedTeam);
+    setSelectedTeam(null);
+    setAnchorEl(null);
+  };
+
+  const handleDelete = async () => {
+    try {
+      const response = await fetch(`https://localhost:7116/api/teams/${selectedTeam.id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
+      const filteredTeams = teams.filter((team) => team.id !== selectedTeam.id);
+      setTeams(filteredTeams);
+    } catch (e) {
+      console.log(e);
+    }
+    setAnchorEl(null);
+    setSelectedTeam(null);
+  };
+
+  const closeUpdateModal = () => {
+    setEditingTeam(null);
+  };
 
   const navigateToSelectedTeamsRoster = (id, teamName) => {
     navigateTo(`/komandos/${id}`);
@@ -46,6 +121,15 @@ export const Team = () => {
                   <StyledListItem
                     key={team.id}
                     onClick={() => navigateToSelectedTeamsRoster(team.id, team.name)}
+                    secondaryAction={
+                      <IconButton
+                        edge="end"
+                        onClick={(e) => handleClick(team, e)}
+                        sx={{ "&:hover": { bgcolor: "gray" } }}
+                      >
+                        <MoreVert sx={{ color: "white" }} />
+                      </IconButton>
+                    }
                   >
                     <StyledItemText
                       primary={team.name}
@@ -56,6 +140,26 @@ export const Team = () => {
               })}
             </StyledList>
           </StyledBox>
+          <TeamAddModal onCreate={onCreate} />
+          {!!editingTeam && (
+            <TeamEditModal team={editingTeam} onUpdate={onUpdate} close={closeUpdateModal} />
+          )}
+          <Menu
+            open={openMoreOptions}
+            anchorEl={anchorEl}
+            onClose={handleClose}
+            anchorOrigin={{
+              vertical: "top",
+              horizontal: "right",
+            }}
+            transformOrigin={{
+              vertical: "top",
+              horizontal: "right",
+            }}
+          >
+            <MenuItem onClick={handleEdit}>Keisti</MenuItem>
+            <MenuItem onClick={handleDelete}>Trinti</MenuItem>
+          </Menu>
         </>
       )}
     </>

@@ -14,13 +14,15 @@ import {
   MenuItem,
   Menu,
 } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import { UserContext } from "../context/user-context";
+import React, { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./styles.css";
 import { TournamentAddModal } from "./tournament-add-modal";
 import { TournamentEditModal } from "./tournament-edit-modal";
 
 export const Tournament = () => {
+  const { user } = useContext(UserContext);
   const [tournaments, setTournaments] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedTournament, setSelectedTournament] = useState(null);
@@ -60,9 +62,8 @@ export const Tournament = () => {
         {
           method: "DELETE",
           headers: {
-            "Content-Type": "application/json",
+            Authorization: `Bearer ${user.token}`,
           },
-          body: JSON.stringify(""),
         }
       );
       const filteredTournaments = tournaments.filter(
@@ -93,7 +94,12 @@ export const Tournament = () => {
   const fetchTournaments = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch("https://localhost:7116/api/tournaments");
+      const response = await fetch("https://localhost:7116/api/tournaments", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
       const data = await response.json();
       setTournaments(data);
       setIsLoading(false);

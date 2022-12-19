@@ -11,17 +11,25 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
+import { UserContext } from "../../context/user-context";
 import React, { useEffect, useState } from "react";
+import { useContext } from "react";
 import "./styles.css";
 
 export const TeamTournamentsTable = () => {
+  const { user } = useContext(UserContext);
   const [teamTournaments, setTeamTournaments] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const getTeamTournaments = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("https://localhost:7116/api/team-tournaments");
+      const response = await fetch("https://localhost:7116/api/team-tournaments", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
       const data = await response.json();
       setTeamTournaments(data);
       setIsLoading(false);

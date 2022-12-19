@@ -9,19 +9,20 @@ export const Player = ({ playerInfo, src, alt, onClick, teamId, teamName }) => {
     navigateTo(`/komandos/${teamId}/zaidejas/${playerId}`);
   };
   // taking away played Id since we don't need to show it
-  const playerWithoutId = (({ Id, ...o }) => o)(playerInfo);
+  const playerWithoutId = (({ id, ...o }) => o)(playerInfo);
 
   return (
-    <article className="player" onClick={() => onPlayerClick(playerInfo.Id)}>
+    <article className="player" onClick={() => onPlayerClick(playerInfo.id)}>
       <div className="img__container">
         <img src={src} alt={alt} />
       </div>
       <div className="player__info">
-        <h2>{playerInfo.Name}</h2>
+        <h2>{playerInfo.name}</h2>
         <dl>
           {Object.entries(playerWithoutId).map((entry) => {
             const [key, value] = entry;
-            if (key === "TeamName") return <React.Fragment key={key}></React.Fragment>;
+            if (key === "teamName" || key === "username" || key === "userId")
+              return <React.Fragment key={key}></React.Fragment>;
             return (
               <React.Fragment key={key}>
                 <dt>{key}</dt>
@@ -35,15 +36,15 @@ export const Player = ({ playerInfo, src, alt, onClick, teamId, teamName }) => {
   );
 };
 
-const exampleResponseObject = {
-  playerId: 1,
-  name: "team1player",
-  surname: "team1player",
-  points: 0,
-  assists: 0,
-  rebounds: 0,
-  totalGames: 0,
-  teamId: 1,
-  userId: null,
-  user: null,
-};
+// const exampleResponseObject = {
+//   playerId: 1,
+//   name: "team1player",
+//   surname: "team1player",
+//   points: 0,
+//   assists: 0,
+//   rebounds: 0,
+//   totalGames: 0,
+//   teamId: 1,
+//   userId: null,
+//   user: null,
+// };

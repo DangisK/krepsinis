@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { Navbar } from "./navbar";
 import { Footer } from "./footer";
 import { Home } from "./home";
-import { Routes, Route, useNavigate } from "react-router-dom";
+import { Routes, Route, useNavigate, Navigate } from "react-router-dom";
 import { Standings } from "./standings";
 import { Schedule } from "./schedule";
 import { Roster } from "./roster";
@@ -22,63 +22,182 @@ import { Team } from "./team";
 import { PageNotFound } from "./page-not-found";
 import { Tournament } from "./tournament";
 import { Match } from "./match";
+import { UserContext } from "./context/user-context";
 
 function App() {
-  const [user, setUser] = useState({ token: "kazkas", roles: ["Admin"] });
-  const isUserLoggedIn = user.token !== "";
+  const localStorageData = JSON.parse(localStorage.getItem("basketballJWT"));
+  const [user, setUser] = useState(
+    localStorageData === null
+      ? { token: "", roles: [], name: "" }
+      : {
+          token: localStorageData.token,
+          roles: localStorageData.roles,
+          name: localStorageData.name,
+        }
+  );
+  const [isUserLoggedIn, setIsUserLoggedIn] = useState(user.token !== "");
+
+  console.log(user, isUserLoggedIn);
   const navigateTo = useNavigate();
 
-  // useEffect(() => {
-  //   if (isUserLoggedIn) {
-  //     navigateTo("/komandos");
-  //   } else {
-  //     navigateTo("/auth");
-  //   }
-  // }, [isUserLoggedIn]);
+  const onLogout = () => {
+    localStorage.removeItem("basketballJWT");
+    setUser({ token: "", roles: [], name: "" });
+    setIsUserLoggedIn(false);
+  };
+
+  useEffect(() => {
+    if (isUserLoggedIn) {
+      navigateTo("/");
+    }
+  }, [isUserLoggedIn]);
+
+  useEffect(() => {
+    setIsUserLoggedIn(user.token !== "");
+  }, [user]);
+
+  const ProtectedRoute = ({ children }) => {
+    if (!isUserLoggedIn) {
+      // user is not authenticated
+      return <Navigate to="/auth" />;
+    }
+    return children;
+  };
 
   return (
     <>
-      <AppContext.Provider value={{ user, setUser }}>
-        {!isUserLoggedIn ? (
-          <Routes>
-            <Route path="/auth" element={<Auth />} />
-            <Route path="*" element={<PageNotFound />} />
-          </Routes>
-        ) : (
-          <>
-            <Navbar />
-            <main>
-              <div className="container">
-                <Routes>
-                  <Route index exact path="/" element={<Home />} />
-                  <Route path="/turnyrine-lentele" element={<Standings />} />
-                  <Route path="/tvarkarastis" element={<Schedule />} />
-                  <Route path="/turnyrai" element={<Tournament />} />
-                  <Route path="/turnyrai/:turnyroId" element={<Match />} />
-                  <Route path="/komandos/:komandosId" element={<Roster />} />
+      <UserContext.Provider value={{ user, setUser }}>
+        <>
+          <Navbar onLogout={onLogout} />
+          <main>
+            <div className="container">
+              <Routes>
+                <Route path="/auth" element={<Auth />} />
+                <Route
+                  index
+                  exact
+                  path="/"
+                  element={
+                    <ProtectedRoute>
+                      <Home />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/turnyrine-lentele"
+                  element={
+                    <ProtectedRoute>
+                      <Standings />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/tvarkarastis"
+                  element={
+                    <ProtectedRoute>
+                      <Schedule />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/turnyrai"
+                  element={
+                    <ProtectedRoute>
+                      <Tournament />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/turnyrai/:turnyroId"
+                  element={
+                    <ProtectedRoute>
+                      <Match />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/komandos/:komandosId"
+                  element={
+                    <ProtectedRoute>
+                      <Roster />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/komandos/:komandosId/zaidejas/:zaidejoId"
+                  element={
+                    <ProtectedRoute>
+                      <SelectedPlayer />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/komandos"
+                  element={
+                    <ProtectedRoute>
+                      <Team />
+                    </ProtectedRoute>
+                  }
+                />
+                {user.roles.find((role) => role === "Admin") && (
                   <Route
-                    path="/komandos/:komandosId/zaidejas/:zaidejoId"
-                    element={<SelectedPlayer />}
-                  />
-                  <Route path="/komandos" element={<Team />} />
-                  {user.roles.find((role) => role === "Admin") && (
-                    <Route path="/db-lenteles" element={<AdminDashboard />}>
-                      <Route index element={<TeamsTable />} />
-                      <Route path="komandos" element={<TeamsTable />} />
-                      <Route path="zaidejai" element={<PlayersTable />} />
-                      <Route path="traumos" element={<InjuriesTable />} />
-                      <Route path="rungtynes" element={<MatchesTable />} />
-                      <Route path="turnyrai" element={<TournamentsTable />} />
-                    </Route>
-                  )}
-                  <Route path="*" element={<PageNotFound />} />
-                </Routes>
-              </div>
-            </main>
-            <Footer />
-          </>
-        )}
-      </AppContext.Provider>
+                    path="/db-lenteles"
+                    element={
+                      <ProtectedRoute>
+                        <AdminDashboard />
+                      </ProtectedRoute>
+                    }
+                  >
+                    <Route index element={<TeamsTable />} />
+                    <Route
+                      path="komandos"
+                      element={
+                        <ProtectedRoute>
+                          <TeamsTable />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="zaidejai"
+                      element={
+                        <ProtectedRoute>
+                          <PlayersTable />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="traumos"
+                      element={
+                        <ProtectedRoute>
+                          <InjuriesTable />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="rungtynes"
+                      element={
+                        <ProtectedRoute>
+                          <MatchesTable />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="turnyrai"
+                      element={
+                        <ProtectedRoute>
+                          <TournamentsTable />
+                        </ProtectedRoute>
+                      }
+                    />
+                  </Route>
+                )}
+                <Route path="*" element={<PageNotFound />} />
+              </Routes>
+            </div>
+          </main>
+          <Footer />
+        </>
+      </UserContext.Provider>
     </>
   );
 }

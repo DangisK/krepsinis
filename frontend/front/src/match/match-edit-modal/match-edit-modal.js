@@ -22,28 +22,18 @@ import { DateTimePicker } from "@mui/x-date-pickers";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
-import { findTeamValueForSelect } from "./find-team-value-for-select";
+import { UserContext } from "../../context/user-context";
+import { useContext } from "react";
 // import { GetUserData } from "../../pages/auth";
 
 export const MatchEditModal = ({ teams, match, onUpdate, close }) => {
+  const { user } = useContext(UserContext);
   const [isLoading, setIsLoading] = useState(false);
   const [homeTeamScore, setHomeTeamScore] = useState(match.homeTeamScore);
   const [awayTeamScore, setAwayTeamScore] = useState(match.awayTeamScore);
-  const [homeTeam, setHomeTeam] = useState(findTeamValueForSelect("home", teams, match));
-  const [awayTeam, setAwayTeam] = useState(findTeamValueForSelect("away", teams, match));
+  const [homeTeam, setHomeTeam] = useState(match.homeTeamId);
+  const [awayTeam, setAwayTeam] = useState(match.awayTeamId);
   const [date, setDate] = useState(match.matchDate);
-
-  // const mockFetchData = {
-  //   "id": 2,
-  //   "homeTeamScore": 50,
-  //   "awayTeamScore": 55,
-  //   "tournamentId": 1,
-  //   "matchDate": "2022-12-11T21:49:10.8184076",
-  //   "homeTeamId": 1,
-  //   "awayTeamId": 3,
-  //   "homeTeamName": "string",
-  //   "awayTeamName": "string5"
-  // },
 
   const handleDateChange = (newValue) => {
     setDate(newValue);
@@ -65,6 +55,7 @@ export const MatchEditModal = ({ teams, match, onUpdate, close }) => {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${user.token}`,
           },
           body: JSON.stringify(updatedMatch),
         }
@@ -174,7 +165,7 @@ export const MatchEditModal = ({ teams, match, onUpdate, close }) => {
           <FormControl sx={{ width: "100%", marginTop: "20px" }}>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DateTimePicker
-                label="Laikas"
+                label="Įkūrimo data"
                 value={date}
                 onChange={handleDateChange}
                 renderInput={(params) => <TextField {...params} />}

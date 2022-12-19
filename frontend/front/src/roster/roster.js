@@ -2,24 +2,44 @@
 import Typography from "@mui/material/Typography";
 import "./styles.css";
 import { Player } from "../player";
-import { LinearProgress } from "@mui/material";
+import { IconButton, LinearProgress, Menu, MenuItem } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
+import { PlayerAddModal } from "./player-add-modal";
+import { PlayerEditModal } from "../selected-player/player-edit-modal";
+import { MoreVert } from "@mui/icons-material";
+import { apiImages } from "../images/api-images";
+import { useContext } from "react";
+import { UserContext } from "../context/user-context";
 
 export const Roster = () => {
+  const { user } = useContext(UserContext);
   const { komandosId } = useParams();
-  const navigateTo = useNavigate();
-
   const [team, setTeam] = useState(null);
   const [players, setPlayers] = useState([]);
   const [images, setImages] = useState([]);
   const [isFetching, setIsFetching] = useState(true);
+  const navigateTo = useNavigate();
 
   useEffect(() => {
-    setImages(mockData);
+    // setImages(apiImages);
     // fetchImages();
     fetchPlayers();
     fetchTeam();
   }, []);
+
+  const onUpdate = (updatedPlayer) => {
+    const updatedPlayers = players.map((player) =>
+      player.id === updatedPlayer.id ? updatedPlayer : player
+    );
+    console.log(players);
+    setPlayers(updatedPlayers);
+  };
+
+  const onCreate = (createdPlayer) => {
+    const newPlayers = [...players, createdPlayer];
+    console.log(newPlayers);
+    setPlayers(newPlayers);
+  };
 
   const fetchImages = async () => {
     setIsFetching(true);
@@ -36,23 +56,18 @@ export const Roster = () => {
   const fetchPlayers = async () => {
     try {
       setIsFetching(true);
-      const response = await fetch(`https://localhost:7116/api/teams/${komandosId}/players`);
+      const response = await fetch(`https://localhost:7116/api/teams/${komandosId}/players`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
       const data = await response.json();
       if (data.status === 404) {
         navigateTo("/komandos");
         return;
       }
-      const mappedData = data.map((player) => ({
-        Id: player.playerId,
-        Name: player.name,
-        Surname: player.surname,
-        Points: player.points,
-        Assists: player.assists,
-        Rebounds: player.rebounds,
-        GamesPlayed: player.totalGames,
-        TeamName: player.team.name,
-      }));
-      setPlayers(mappedData);
+      setPlayers(data);
       setIsFetching(false);
     } catch (e) {
       console.log(e);
@@ -62,7 +77,12 @@ export const Roster = () => {
   const fetchTeam = async () => {
     try {
       setIsFetching(true);
-      const response = await fetch(`https://localhost:7116/api/teams/${komandosId}`);
+      const response = await fetch(`https://localhost:7116/api/teams/${komandosId}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
       const data = await response.json();
       console.log(data);
       if (data.status === 404) {
@@ -76,31 +96,30 @@ export const Roster = () => {
     }
   };
 
+  if (isFetching || team === null) return <LinearProgress sx={{ width: "100%" }} />;
+
+  console.log(players);
+
   return (
     <>
-      {isFetching || team === null ? (
-        <LinearProgress sx={{ width: "100%" }} />
-      ) : (
-        <>
-          <div className="content__header">
-            <Typography variant="h2">{team.name} komandos sudėtis</Typography>
-          </div>
-          <div className="team">
-            {players.map((player, id) => {
-              return (
-                <Player
-                  playerInfo={player}
-                  src={images[id]["src"]}
-                  alt={images[id]["alt"]}
-                  key={id}
-                  teamId={komandosId}
-                  teamName={player.TeamName}
-                />
-              );
-            })}
-          </div>
-        </>
-      )}
+      <div className="content__header">
+        <Typography variant="h2">{team.name} komandos sudėtis</Typography>
+      </div>
+      <div className="team">
+        {players.map((player) => {
+          return (
+            <Player
+              playerInfo={player}
+              src={apiImages[player.id % 10]["src"]}
+              alt={apiImages[player.id % 10]["alt"]}
+              key={player.id}
+              teamId={komandosId}
+              teamName={team.name}
+            />
+          );
+        })}
+      </div>
+      <PlayerAddModal onCreate={onCreate} teamId={komandosId} />
     </>
   );
 };
@@ -117,46 +136,3 @@ export const Roster = () => {
 //   userId: null,
 //   user: null,
 // };
-
-const mockData = [
-  {
-    src: "https://images.unsplash.com/photo-1546519638-68e109498ffc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzODM2Njl8MHwxfHNlYXJjaHwxfHxiYXNrZXRiYWxsfGVufDB8fHx8MTY2OTQwMDY1NQ&ixlib=rb-4.0.3&q=80&w=400",
-    alt: "ball under basketball ring",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1515523110800-9415d13b84a8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzODM2Njl8MHwxfHNlYXJjaHwyfHxiYXNrZXRiYWxsfGVufDB8fHx8MTY2OTQwMDY1NQ&ixlib=rb-4.0.3&q=80&w=400",
-    alt: "basketball on ring",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1574623452334-1e0ac2b3ccb4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzODM2Njl8MHwxfHNlYXJjaHwzfHxiYXNrZXRiYWxsfGVufDB8fHx8MTY2OTQwMDY1NQ&ixlib=rb-4.0.3&q=80&w=400",
-    alt: "brown Spalding basketball lot",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1627627256672-027a4613d028?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzODM2Njl8MHwxfHNlYXJjaHw0fHxiYXNrZXRiYWxsfGVufDB8fHx8MTY2OTQwMDY1NQ&ixlib=rb-4.0.3&q=80&w=400",
-    alt: "brown and black basketball ball",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1608245449230-4ac19066d2d0?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzODM2Njl8MHwxfHNlYXJjaHw1fHxiYXNrZXRiYWxsfGVufDB8fHx8MTY2OTQwMDY1NQ&ixlib=rb-4.0.3&q=80&w=400",
-    alt: "2 boys playing basketball on basketball court",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1590227632180-80a3bf110871?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzODM2Njl8MHwxfHNlYXJjaHw2fHxiYXNrZXRiYWxsfGVufDB8fHx8MTY2OTQwMDY1NQ&ixlib=rb-4.0.3&q=80&w=400",
-    alt: "person walking on basketball court",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1519861531473-9200262188bf?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzODM2Njl8MHwxfHNlYXJjaHw3fHxiYXNrZXRiYWxsfGVufDB8fHx8MTY2OTQwMDY1NQ&ixlib=rb-4.0.3&q=80&w=400",
-    alt: "Spalding basketball in court",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1577471488278-16eec37ffcc2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzODM2Njl8MHwxfHNlYXJjaHw4fHxiYXNrZXRiYWxsfGVufDB8fHx8MTY2OTQwMDY1NQ&ixlib=rb-4.0.3&q=80&w=400",
-    alt: "people playing basketball inside court",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1542652694-40abf526446e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzODM2Njl8MHwxfHNlYXJjaHw5fHxiYXNrZXRiYWxsfGVufDB8fHx8MTY2OTQwMDY1NQ&ixlib=rb-4.0.3&q=80&w=400",
-    alt: "basketball ball photography",
-  },
-  {
-    src: "https://images.unsplash.com/photo-1518063319789-7217e6706b04?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzODM2Njl8MHwxfHNlYXJjaHwxMHx8YmFza2V0YmFsbHxlbnwwfHx8fDE2Njk0MDA2NTU&ixlib=rb-4.0.3&q=80&w=400",
-    alt: "low angle photography of basketball hoop",
-  },
-];
