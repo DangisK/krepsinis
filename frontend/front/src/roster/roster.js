@@ -1,99 +1,138 @@
-﻿import React from "react";
+﻿import React, { useEffect, useState } from "react";
 import Typography from "@mui/material/Typography";
 import "./styles.css";
+import { Player } from "../player";
+import { IconButton, LinearProgress, Menu, MenuItem } from "@mui/material";
+import { useNavigate, useParams } from "react-router-dom";
+import { PlayerAddModal } from "./player-add-modal";
+import { PlayerEditModal } from "../selected-player/player-edit-modal";
+import { MoreVert } from "@mui/icons-material";
+import { apiImages } from "../images/api-images";
+import { useContext } from "react";
+import { UserContext } from "../context/user-context";
 
 export const Roster = () => {
+  const { user } = useContext(UserContext);
+  const { komandosId } = useParams();
+  const [team, setTeam] = useState(null);
+  const [players, setPlayers] = useState([]);
+  const [images, setImages] = useState([]);
+  const [isFetching, setIsFetching] = useState(true);
+  const navigateTo = useNavigate();
+
+  useEffect(() => {
+    // setImages(apiImages);
+    // fetchImages();
+    fetchPlayers();
+    fetchTeam();
+  }, []);
+
+  const onUpdate = (updatedPlayer) => {
+    const updatedPlayers = players.map((player) =>
+      player.id === updatedPlayer.id ? updatedPlayer : player
+    );
+    console.log(players);
+    setPlayers(updatedPlayers);
+  };
+
+  const onCreate = (createdPlayer) => {
+    const newPlayers = [...players, createdPlayer];
+    console.log(newPlayers);
+    setPlayers(newPlayers);
+  };
+
+  const fetchImages = async () => {
+    setIsFetching(true);
+    const response = await fetch(
+      "https://api.unsplash.com/search/photos?query=basketball&client_id=dE2uZwZjrsYoLBH1GDqaNNd5ku4W7KJo4VyNTX4OROY"
+    );
+    const data = await response.json();
+    console.log(data.results);
+    const photos = data.results.map((img) => ({ src: img.urls.small, alt: img.alt_description }));
+    setImages(photos);
+    setIsFetching(false);
+  };
+
+  const fetchPlayers = async () => {
+    try {
+      setIsFetching(true);
+      const response = await fetch(`https://localhost:7116/api/teams/${komandosId}/players`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
+      const data = await response.json();
+      if (data.status === 404) {
+        navigateTo("/komandos");
+        return;
+      }
+      setPlayers(data);
+      setIsFetching(false);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const fetchTeam = async () => {
+    try {
+      setIsFetching(true);
+      const response = await fetch(`https://localhost:7116/api/teams/${komandosId}`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
+      const data = await response.json();
+      console.log(data);
+      if (data.status === 404) {
+        navigateTo("/komandos");
+        return;
+      }
+      setTeam(data);
+      setIsFetching(false);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  if (isFetching || team === null) return <LinearProgress sx={{ width: "100%" }} />;
+
+  console.log(players);
+
   return (
     <>
       <div className="content__header">
-        <Typography variant="h2">Komandos sudėtis</Typography>
+        <Typography variant="h2">{team.name} komandos sudėtis</Typography>
       </div>
       <div className="team">
-        <article className="player">
-          <img
-            src="https://www.biography.com/.image/ar_1:1%2Cc_fill%2Ccs_srgb%2Cfl_progressive%2Cq_auto:good%2Cw_1200/MTY2NzA3MjE1MzQyNzczNTQw/lebron-james-photo-by-streeter-lecka_getty-images.jpg"
-            alt="Team player"
-          />
-          <div className="player__info">
-            <h2>LeBron James</h2>
-            <dl className="player__info--stats">
-              <dt>Pozicija</dt>
-              <dd>Puolėjas</dd>
-              <dt>Kilmė</dt>
-              <dd>Lietuva</dd>
-              <dt>Gimimo data</dt>
-              <dd>1971-04-22</dd>
-              <dt>Ūgis</dt>
-              <dd>210 cm</dd>
-              <dt>Svoris</dt>
-              <dd>103 kg</dd>
-            </dl>
-          </div>
-        </article>
-        <article className="player">
-          <img
-            src="https://imageio.forbes.com/specials-images/imageserve/627bdaec36beab21cd23ad21/0x0.jpg?format=jpg&crop=1003,1002,x921,y73,safe&height=416&width=416&fit=bounds"
-            alt="Team player"
-          />
-          <div className="player__info">
-            <h2>Stephen Curry</h2>
-            <dl>
-              <dt>Pozicija</dt>
-              <dd>Centras</dd>
-              <dt>Kilmė</dt>
-              <dd>Latvija</dd>
-              <dt>Gimimo data</dt>
-              <dd>1999-09-06</dd>
-              <dt>Ūgis</dt>
-              <dd>187 cm</dd>
-              <dt>Svoris</dt>
-              <dd>80 kg</dd>
-            </dl>
-          </div>
-        </article>
-        <article className="player">
-          <img
-            src="https://upload.wikimedia.org/wikipedia/commons/d/dd/Robertas_Javtokas_by_Augustas_Didzgalvis.jpg"
-            alt="Team player"
-          />
-          <div className="player__info">
-            <h2>Robertas Javtokas</h2>
-            <dl>
-              <dt>Pozicija</dt>
-              <dd>Centras</dd>
-              <dt>Kilmė</dt>
-              <dd>Lietuva</dd>
-              <dt>Gimimo data</dt>
-              <dd>1980-03-20</dd>
-              <dt>Ūgis</dt>
-              <dd>211 cm</dd>
-              <dt>Svoris</dt>
-              <dd>122 kg</dd>
-            </dl>
-          </div>
-        </article>
-        <article className="player">
-          <img
-            src="https://img.bleacherreport.net/img/images/photos/003/702/864/1a5d4db530f5166f4528eed4481df168_crop_exact.jpg?w=798&h=531&q=75"
-            alt="Team player"
-          />
-          <div className="player__info">
-            <h2>Budget Klay Thompson</h2>
-            <dl>
-              <dt>Pozicija</dt>
-              <dd>Suolas</dd>
-              <dt>Kilmė</dt>
-              <dd>USA</dd>
-              <dt>Gimimo data</dt>
-              <dd>1986-05-10</dd>
-              <dt>Ūgis</dt>
-              <dd>205 cm</dd>
-              <dt>Svoris</dt>
-              <dd>130 kg</dd>
-            </dl>
-          </div>
-        </article>
+        {players.map((player) => {
+          return (
+            <Player
+              playerInfo={player}
+              src={apiImages[player.id % 10]["src"]}
+              alt={apiImages[player.id % 10]["alt"]}
+              key={player.id}
+              teamId={komandosId}
+              teamName={team.name}
+            />
+          );
+        })}
       </div>
+      <PlayerAddModal onCreate={onCreate} teamId={komandosId} />
     </>
   );
 };
+
+// const exampleResponseObject = {
+//   playerId: 1,
+//   name: "team1player",
+//   surname: "team1player",
+//   points: 0,
+//   assists: 0,
+//   rebounds: 0,
+//   totalGames: 0,
+//   teamId: 1,
+//   userId: null,
+//   user: null,
+// };

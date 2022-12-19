@@ -11,17 +11,25 @@ import {
   Box,
   CircularProgress,
 } from "@mui/material";
+import { UserContext } from "../../context/user-context";
 import React, { useEffect, useState } from "react";
+import { useContext } from "react";
 import "./styles.css";
 
 export const TeamsTable = () => {
+  const { user } = useContext(UserContext);
   const [teams, setTeams] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const getTeams = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("https://localhost:7116/api/teams");
+      const response = await fetch("https://localhost:7116/api/teams", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
       const data = await response.json();
       setTeams(data);
       setIsLoading(false);

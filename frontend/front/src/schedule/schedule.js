@@ -1,10 +1,10 @@
-﻿import React from "react";
+﻿import React, { useEffect } from "react";
 import Typography from "@mui/material/Typography";
 import "./styles.css";
 
 export const Schedule = () => {
   return (
-    <>
+    <div className="schedule">
       <div className="content__header">
         <Typography variant="h2">Tvarkaraštis</Typography>
       </div>
@@ -92,6 +92,6 @@ export const Schedule = () => {
           </tbody>
         </table>
       </div>
-    </>
+    </div>
   );
 };

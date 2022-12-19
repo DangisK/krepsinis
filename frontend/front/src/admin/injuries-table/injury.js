@@ -11,17 +11,24 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import { UserContext } from "../../context/user-context";
+import React, { useContext, useEffect, useState } from "react";
 import "./styles.css";
 
 export const InjuriesTable = () => {
+  const { user } = useContext(UserContext);
   const [isLoading, setIsLoading] = useState(true);
   const [injuries, setInjuries] = useState([]);
 
   const getInjuries = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("https://localhost:7116/api/injuries");
+      const response = await fetch("https://localhost:7116/api/injuries", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
       const data = await response.json();
       setInjuries(data);
       setIsLoading(false);

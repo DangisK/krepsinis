@@ -11,17 +11,25 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
+import { UserContext } from "../../context/user-context";
 import React, { useEffect, useState } from "react";
 import "./styles.css";
+import { useContext } from "react";
 
 export const MatchesTable = () => {
+  const { user } = useContext(UserContext);
   const [isLoading, setIsLoading] = useState(true);
   const [matches, setMatches] = useState([]);
 
   const getMatches = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch("https://localhost:7116/api/matches");
+      const response = await fetch("https://localhost:7116/api/matches", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
       const data = await response.json();
       setMatches(data);
       setIsLoading(false);

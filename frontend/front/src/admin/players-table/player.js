@@ -13,10 +13,13 @@ import {
   CircularProgress,
   Box,
 } from "@mui/material";
+import { UserContext } from "../../context/user-context";
 import React, { useEffect, useState } from "react";
+import { useContext } from "react";
 import "./styles.css";
 
 export const PlayersTable = () => {
+  const { user } = useContext(UserContext);
   const [teams, setTeams] = useState([]);
   const [players, setPlayers] = useState([]);
   const [teamId, setTeamId] = useState(null);
@@ -27,7 +30,12 @@ export const PlayersTable = () => {
   const fetchTeams = async () => {
     setIsTeamsLoading(true);
     try {
-      const response = await fetch("https://localhost:7116/api/teams");
+      const response = await fetch("https://localhost:7116/api/teams", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
       const data = await response.json();
       setTeams(data);
       setTeamId(data[0].id);
@@ -39,7 +47,12 @@ export const PlayersTable = () => {
 
   const getPlayers = async () => {
     setIsPlayersLoading(true);
-    const response = await fetch(`https://localhost:7116/api/teams/${teamId}/players`);
+    const response = await fetch(`https://localhost:7116/api/teams/${teamId}/players`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${user.token}`,
+      },
+    });
     const data = await response.json();
     setPlayers(data);
     data.forEach((player) => getInjuries(player.playerId));
@@ -48,7 +61,12 @@ export const PlayersTable = () => {
 
   const getInjuries = async (playerId) => {
     try {
-      const response = await fetch(`https://localhost:7116/api/players/${playerId}/injuries/`);
+      const response = await fetch(`https://localhost:7116/api/players/${playerId}/injuries/`, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${user.token}`,
+        },
+      });
       const data = await response.json();
       setInjuries((injuries) => ({
         ...injuries,

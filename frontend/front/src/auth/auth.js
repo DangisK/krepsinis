@@ -1,27 +1,80 @@
-import { Box, Button, TextField, Typography } from "@mui/material";
+import { Box, Button, FormHelperText, TextField, Typography } from "@mui/material";
 import React, { useState, useContext } from "react";
-import { AppContext } from "../AppContext";
+import { useNavigate } from "react-router-dom";
+import { UserContext } from "../context/user-context";
 import "./styles.css";
+
+export const setUserData = () => {
+  const JWT = localStorage.getItem("basketballJWT");
+  const user = parseJwt(JWT);
+  const userRoles = user["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+  const name = user["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"];
+  return { token: JWT, roles: [...userRoles], name };
+};
 
 export const Auth = () => {
   const [isSignup, setIsSignup] = useState(false);
-  const { setUser } = useContext(AppContext);
+  const { user, setUser } = useContext(UserContext);
 
+  const [errorMessage, setErrorMessage] = useState("");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigateTo = useNavigate();
 
-  const [errors, setErrors] = useState({
-    nameErrors: true,
-    emailErrors: true,
-    passwordErrors: true,
-  });
+  // State variables for input validation
+  const [nameError, setNameError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [formValid, setFormValid] = useState(false);
 
   const headerText = isSignup ? "Signup" : "Login";
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    isSignup ? sendRegisterRequest() : sendLoginRequest();
+
+    // Validate the form before submission
+    if (validateForm()) {
+      isSignup ? sendRegisterRequest() : sendLoginRequest();
+    }
+  };
+
+  const validateForm = () => {
+    let formIsValid = true;
+
+    // Validate the name field
+    if (!name) {
+      setNameError("Name cannot be empty");
+      formIsValid = false;
+    } else {
+      setNameError("");
+    }
+
+    // Validate the email field
+    if (isSignup) {
+      const emailRegex =
+        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+      if (!emailRegex.test(email)) {
+        setEmailError("Please enter a valid email address");
+        formIsValid = false;
+      } else {
+        setEmailError("");
+      }
+    }
+
+    // Validate the password field
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*])(?=.{6,})/;
+    if (!passwordRegex.test(password)) {
+      setPasswordError(
+        "Password must contain a digit, a lowercase letter, an uppercase letter, a non alpha numeric value, and have a minimum length of 6"
+      );
+      formIsValid = false;
+    } else {
+      setPasswordError("");
+    }
+
+    setFormValid(formIsValid);
+    return formIsValid;
   };
 
   const resetDetails = () => {
@@ -41,12 +94,18 @@ export const Auth = () => {
         body: JSON.stringify(userToLogIn),
       });
       const data = await response.json();
-      const user = parseJwt(data.accessToken);
-      const userRoles = user["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
-      setUser({ user: data.accessToken, roles: [...userRoles] });
+      const tokenData = parseJwt(data.accessToken);
+      const roles = tokenData["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+      const name = tokenData["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"];
+      localStorage.setItem(
+        "basketballJWT",
+        JSON.stringify({ token: data.accessToken, roles: [roles], name })
+      );
+      setUser({ token: data.accessToken, roles: [roles], name });
+      navigateTo("/");
     } catch (e) {
-      resetDetails();
       console.log(e);
+      setErrorMessage("Invalid user information");
     }
   };
 
@@ -67,53 +126,6 @@ export const Auth = () => {
     }
   };
 
-  const handleName = (name) => {
-    const nameValidator = /[a-zA-Z\d]/gm;
-    const matchedName = name.match(nameValidator);
-    if (name === "" || !matchedName || matchedName.length !== name.length)
-      setErrors({ ...errors, nameErrors: true });
-    else {
-      setErrors({ ...errors, nameErrors: false });
-    }
-  };
-
-  const handleEmail = (email) => {
-    const emailValidator =
-      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    const matchedEmail = email.match(emailValidator);
-    if (email === "" || !matchedEmail || matchedEmail.length !== email.length)
-      setErrors({ ...errors, emailErrors: true });
-    else {
-      setErrors({ ...errors, emailErrors: false });
-    }
-  };
-
-  const handlePassword = (password) => {
-    const passwordValidator = /[a-zA-Z\d]/gm;
-    const matchedPassword = password.match(passwordValidator);
-    if (password === "" || !matchedPassword || matchedPassword.length !== password.length)
-      setErrors({ ...errors, passwordErrors: true });
-    else {
-      setErrors({ ...errors, passwordErrors: false });
-    }
-  };
-
-  function parseJwt(token) {
-    var base64Url = token.split(".")[1];
-    var base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-    var jsonPayload = decodeURIComponent(
-      window
-        .atob(base64)
-        .split("")
-        .map(function (c) {
-          return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
-        })
-        .join("")
-    );
-
-    return JSON.parse(jsonPayload);
-  }
-
   return (
     <div className="auth">
       <form className="auth-form" onSubmit={handleSubmit}>
@@ -130,9 +142,11 @@ export const Auth = () => {
             backgroundColor: "#FFFFEF",
           }}
         >
-          <Typography variant="h2" padding={3} textAlign="center">
+          <Typography variant="h2" padding={3} textAlign="center" sx={{ color: "black" }}>
             {headerText}
           </Typography>
+          {!!errorMessage && <FormHelperText error>{errorMessage}</FormHelperText>}
+
           <TextField
             name="name"
             value={name}
@@ -144,8 +158,9 @@ export const Auth = () => {
             onChange={(e) => {
               const newName = e.target.value;
               setName(newName);
-              handleName(newName);
             }}
+            error={!!nameError} // show an error if there is a non-empty error message
+            helperText={nameError} // display the error message
           />
           {isSignup && (
             <TextField
@@ -159,8 +174,9 @@ export const Auth = () => {
               onChange={(e) => {
                 const newEmail = e.target.value;
                 setEmail(newEmail);
-                handleEmail(newEmail);
               }}
+              error={!!emailError}
+              helperText={emailError}
             />
           )}
           <TextField
@@ -174,8 +190,9 @@ export const Auth = () => {
             onChange={(e) => {
               const newPassword = e.target.value;
               setPassword(newPassword);
-              handlePassword(newPassword);
             }}
+            error={!!passwordError}
+            helperText={passwordError}
           />
           <Button
             type="submit"
@@ -196,3 +213,19 @@ export const Auth = () => {
     </div>
   );
 };
+
+function parseJwt(token) {
+  var base64Url = token.split(".")[1];
+  var base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+  var jsonPayload = decodeURIComponent(
+    window
+      .atob(base64)
+      .split("")
+      .map(function (c) {
+        return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+      })
+      .join("")
+  );
+
+  return JSON.parse(jsonPayload);
+}
