@@ -17,7 +17,6 @@ import {
   TournamentsTable,
 } from "./admin";
 import { Auth } from "./auth";
-import { AppContext } from "./AppContext";
 import { Team } from "./team";
 import { PageNotFound } from "./page-not-found";
 import { Tournament } from "./tournament";
@@ -49,6 +48,8 @@ function App() {
   useEffect(() => {
     if (isUserLoggedIn) {
       navigateTo("/");
+    } else {
+      navigateTo("/auth");
     }
   }, [isUserLoggedIn]);
 
@@ -139,7 +140,7 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
-                {user.roles.find((role) => role === "Admin") && (
+                {user.roles.length !== 0 && typeof user.roles[0] === "object" && (
                   <Route
                     path="/db-lenteles"
                     element={

@@ -12,7 +12,7 @@ using krepsinisAPI.Context;
 namespace krepsinisAPI.Migrations
 {
     [DbContext(typeof(BasketballDbContext))]
-    [Migration("20221115102805_initial")]
+    [Migration("20221219201448_initial")]
     partial class initial
     {
         /// <inheritdoc />

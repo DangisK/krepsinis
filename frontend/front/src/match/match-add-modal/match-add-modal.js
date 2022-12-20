@@ -145,7 +145,7 @@ export const MatchAddModal = ({ onCreate }) => {
               sx={{ width: 30, height: 30 }}
             />
             <Typography fontWeight={500} variant="span">
-              Dangis
+              {user.name}
             </Typography>
           </UserBox>
           <div className="inputs">
@@ -219,7 +219,7 @@ export const MatchAddModal = ({ onCreate }) => {
           <FormControl sx={{ width: "100%", marginTop: "20px" }}>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
               <DateTimePicker
-                label="Įkūrimo data"
+                label="Rungtynių data"
                 value={date}
                 onChange={handleDateChange}
                 renderInput={(params) => <TextField {...params} />}
@@ -227,7 +227,17 @@ export const MatchAddModal = ({ onCreate }) => {
             </LocalizationProvider>
           </FormControl>
           <ButtonGroup variant="contained" fullWidth sx={{ width: "100%", marginTop: "25px" }}>
-            <Button disabled={isLoading} onClick={createMatch}>
+            <Button
+              disabled={
+                homeTeamScore === "" ||
+                awayTeamScore === "" ||
+                homeTeam === "" ||
+                awayTeam === "" ||
+                date === null ||
+                homeTeam === awayTeam
+              }
+              onClick={createMatch}
+            >
               Sukurti
             </Button>
           </ButtonGroup>

@@ -90,7 +90,7 @@ export const TeamAddModal = ({ onCreate }) => {
           borderRadius={5}
         >
           <Typography variant="h6" textAlign="center">
-            Sukurti Turnyrą
+            Sukurti Komandą
           </Typography>
           <UserBox sx={{ marginTop: "15px" }}>
             <Avatar
@@ -98,7 +98,7 @@ export const TeamAddModal = ({ onCreate }) => {
               sx={{ width: 30, height: 30 }}
             />
             <Typography fontWeight={500} variant="span">
-              Dangis
+              {user.name}
             </Typography>
           </UserBox>
           <div className="inputs">
@@ -133,7 +133,10 @@ export const TeamAddModal = ({ onCreate }) => {
             </LocalizationProvider>
           </FormControl>
           <ButtonGroup variant="contained" fullWidth sx={{ width: "100%", marginTop: "15px" }}>
-            <Button disabled={isLoading} onClick={createTeam}>
+            <Button
+              disabled={date === null || teamName === "" || teamArena === ""}
+              onClick={createTeam}
+            >
               Sukurti
             </Button>
           </ButtonGroup>

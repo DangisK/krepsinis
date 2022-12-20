@@ -104,7 +104,7 @@ export const TournamentAddModal = ({ onCreate }) => {
               sx={{ width: 30, height: 30 }}
             />
             <Typography fontWeight={500} variant="span">
-              Dangis
+              {user.name}
             </Typography>
           </UserBox>
           <TextField

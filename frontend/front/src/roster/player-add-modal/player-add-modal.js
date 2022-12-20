@@ -91,7 +91,7 @@ export const PlayerAddModal = ({ onCreate, teamId }) => {
           borderRadius={5}
         >
           <Typography variant="h6" textAlign="center">
-            Sukurti Turnyrą
+            Sukurti Žaidėją
           </Typography>
           <UserBox sx={{ marginTop: "15px" }}>
             <Avatar
@@ -99,7 +99,7 @@ export const PlayerAddModal = ({ onCreate, teamId }) => {
               sx={{ width: 30, height: 30 }}
             />
             <Typography fontWeight={500} variant="span">
-              Dangis
+              {user.name}
             </Typography>
           </UserBox>
           <div className="inputs">
@@ -183,7 +183,7 @@ export const PlayerAddModal = ({ onCreate, teamId }) => {
             />
           </div>
           <ButtonGroup variant="contained" fullWidth sx={{ width: "100%", marginTop: "20px" }}>
-            <Button disabled={isLoading} onClick={createPlayer}>
+            <Button disabled={name === "" || surname === ""} onClick={createPlayer}>
               Sukurti
             </Button>
           </ButtonGroup>

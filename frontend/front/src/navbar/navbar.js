@@ -25,7 +25,7 @@ export const Navbar = ({ onLogout }) => {
                 <li>
                   <Link to="/turnyrai">Turnyrai</Link>
                 </li>
-                {user.roles.find((role) => role === "Admin") && (
+                {user.roles.length !== 0 && typeof user.roles[0] === "object" && (
                   <li>
                     <Link to="/db-lenteles">Secret!</Link>
                   </li>

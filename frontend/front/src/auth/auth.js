@@ -35,6 +35,7 @@ export const Auth = () => {
 
     // Validate the form before submission
     if (validateForm()) {
+      setErrorMessage("");
       isSignup ? sendRegisterRequest() : sendLoginRequest();
     }
   };

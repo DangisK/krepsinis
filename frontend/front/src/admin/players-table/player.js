@@ -23,7 +23,7 @@ export const PlayersTable = () => {
   const [teams, setTeams] = useState([]);
   const [players, setPlayers] = useState([]);
   const [teamId, setTeamId] = useState(null);
-  const [injuries, setInjuries] = useState({});
+  const [injuries, setInjuries] = useState([]);
   const [isTeamsLoading, setIsTeamsLoading] = useState(true);
   const [isPlayersLoading, setIsPlayersLoading] = useState(true);
 
@@ -55,7 +55,7 @@ export const PlayersTable = () => {
     });
     const data = await response.json();
     setPlayers(data);
-    data.forEach((player) => getInjuries(player.playerId));
+    data.forEach((player) => getInjuries(player.id));
     setIsPlayersLoading(false);
   };
 
@@ -100,6 +100,8 @@ export const PlayersTable = () => {
   if (isTeamsLoading) {
     return <CircularProgress />;
   }
+
+  console.log(players, injuries);
 
   return (
     <Box
@@ -148,7 +150,7 @@ export const PlayersTable = () => {
             <TableBody>
               {players.map((row) => (
                 <TableRow key={row.playerId}>
-                  <StyledTableCell sx={{ color: "white" }}>{row.playerId}</StyledTableCell>
+                  <StyledTableCell sx={{ color: "white" }}>{row.id}</StyledTableCell>
                   <StyledTableCell sx={{ color: "white" }}>{row.name}</StyledTableCell>
                   <StyledTableCell sx={{ color: "white" }}>{row.surname}</StyledTableCell>
                   <StyledTableCell sx={{ color: "white" }}>{row.points}</StyledTableCell>
@@ -156,8 +158,8 @@ export const PlayersTable = () => {
                   <StyledTableCell sx={{ color: "white" }}>{row.rebounds}</StyledTableCell>
                   <StyledTableCell sx={{ color: "white" }}>{row.totalGames}</StyledTableCell>
                   <StyledTableCell sx={{ color: "white" }}>
-                    {!!injuries[row.playerId] &&
-                      injuries[row.playerId].map((injury) => {
+                    {!!injuries[row.id] &&
+                      injuries[row.id].map((injury) => {
                         return <p key={injury.id}>{injury.name}</p>;
                       })}
                   </StyledTableCell>
